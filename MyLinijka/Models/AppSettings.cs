@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Media;
@@ -69,10 +68,14 @@ public sealed class AppSettings
             RectFill = ((SolidColorBrush)options.RectFill).Color.ToString(),
             RectStroke = ((SolidColorBrush)options.RectStroke).Color.ToString(),
             RectThickness = options.RectThickness,
-            StartX = stats.StartPoint.X, StartY = stats.StartPoint.Y,
-            EndX = stats.EndPoint.X, EndY = stats.EndPoint.Y,
-            Length = stats.LengthLine, Angle = stats.Angle,
-            Width = stats.Width, Height = stats.Height
+            StartX = stats.StartPoint.X,
+            StartY = stats.StartPoint.Y,
+            EndX = stats.EndPoint.X,
+            EndY = stats.EndPoint.Y,
+            Length = stats.LengthLine,
+            Angle = stats.Angle,
+            Width = stats.Width,
+            Height = stats.Height
         };
     }
 
