@@ -6,9 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Linijka.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Linijka.ico" />
+    <Resource Include="Linijka.ico" />
     <Folder Include="Models\" />
   </ItemGroup>
 
