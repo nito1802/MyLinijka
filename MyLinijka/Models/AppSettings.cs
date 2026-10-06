@@ -26,13 +26,9 @@ public sealed class AppSettings
     public bool RectangleSelected { get; set; }
     public bool ClickThrough { get; set; }
 
-    public static string FilePath => Path.Combine(AppContext.BaseDirectory, "settings.json");
-
-    public static AppSettings Load()
+    internal void Validate()
     {
-        if (!File.Exists(FilePath)) return new();
-        var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(FilePath))
-            ?? throw new JsonException("Plik ustawień jest pusty.");
+        var settings = this;
         // Validate the complete snapshot before applying any part of it.
         ParseBrush(settings.LineFill);
         ParseBrush(settings.LineStroke);
@@ -44,7 +40,6 @@ public sealed class AppSettings
         if (numbers.Any(value => !double.IsFinite(value)) || settings.LineThickness < 0 ||
             settings.RectThickness < 0 || settings.Length < 0 || settings.Width < 0 || settings.Height < 0)
             throw new JsonException("Nieprawidłowe wartości ustawień.");
-        return settings;
     }
 
     public void Apply(DrawOptionsModel options)
@@ -80,14 +75,6 @@ public sealed class AppSettings
             Length = stats.LengthLine, Angle = stats.Angle,
             Width = stats.Width, Height = stats.Height
         };
-    }
-
-    public void Save()
-    {
-        string json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
-        string temporaryPath = FilePath + ".tmp";
-        File.WriteAllText(temporaryPath, json);
-        File.Move(temporaryPath, FilePath, overwrite: true);
     }
 
     private static SolidColorBrush ParseBrush(string color)

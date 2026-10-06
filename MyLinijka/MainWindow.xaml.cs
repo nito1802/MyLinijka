@@ -67,7 +67,7 @@ namespace MyLinijka
         {
             try
             {
-                var settings = AppSettings.Load();
+                var settings = SettingsSerializer.Load();
                 settings.Apply(toolbarOptions);
                 Canvas.SetLeft(ToolbarGrid, Math.Clamp(settings.PanelLeft, 0,
                     Math.Max(0, MainCanvas.ActualWidth - ToolbarGrid.ActualWidth)));
@@ -78,11 +78,11 @@ namespace MyLinijka
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException)
             {
-                MessageBox.Show(this, $"Nie udało się odczytać ustawień:\n{AppSettings.FilePath}\n\n{error.Message}",
+                MessageBox.Show(this, $"Nie udało się odczytać ustawień:\n{SettingsSerializer.FilePath}\n\n{error.Message}",
                     "Ustawienia", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             settingsReady = true;
-            if (!File.Exists(AppSettings.FilePath)) QueueSettingsSave();
+            if (!File.Exists(SettingsSerializer.FilePath)) QueueSettingsSave();
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -520,6 +520,13 @@ namespace MyLinijka
             settingsTimer.Start();
         }
 
+        private void btnQuit_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show(this, "Czy na pewno chcesz zamknąć aplikację?", "Zamknij aplikację",
+                MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+                Close();
+        }
+
         private void SaveSettings()
         {
             settingsTimer.Stop();
@@ -530,13 +537,13 @@ namespace MyLinijka
                 settings.PanelTop = Canvas.GetTop(ToolbarGrid);
                 settings.RectangleSelected = createShape == CreateShape.Rectangle;
                 settings.ClickThrough = Background == Brushes.Transparent;
-                settings.Save();
+                SettingsSerializer.Save(settings);
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
             {
                 if (settingsErrorShown) return;
                 settingsErrorShown = true;
-                MessageBox.Show(this, $"Nie udało się zapisać ustawień obok aplikacji:\n{AppSettings.FilePath}\n\n{error.Message}",
+                MessageBox.Show(this, $"Nie udało się zapisać ustawień obok aplikacji:\n{SettingsSerializer.FilePath}\n\n{error.Message}",
                     "Ustawienia", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
