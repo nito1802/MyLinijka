@@ -86,7 +86,7 @@
          </ContextMenu>
       </Canvas.ContextMenu>-->
         
-        <Grid Name="ToolbarGrid" Cursor="Hand" PreviewMouseRightButtonDown="ToolbarGrid_PreviewMouseRightButtonDown" Style="{StaticResource GridMouseOver}" Canvas.Left="200" Canvas.Top="0" Background="#99FFFFFF" Panel.ZIndex="10" >
+        <Grid Name="ToolbarGrid" Cursor="Hand" Style="{StaticResource GridMouseOver}" Canvas.Left="200" Canvas.Top="0" Background="#99FFFFFF" Panel.ZIndex="10" >
             <!--Canvas.Left="1000" Canvas.Top="50"-->
 
             <Grid.RowDefinitions>
@@ -113,6 +113,28 @@
                 <!--stats Value-->
             </Grid.ColumnDefinitions>
 
+            <Thumb x:Name="ToolbarDragHandle" Grid.Row="0" Grid.Column="3"
+                   Width="25" Height="22" Margin="2" Cursor="SizeAll"
+                   ToolTip="Przeciągnij, aby przesunąć panel"
+                   DragDelta="ToolbarDragHandle_DragDelta">
+                <Thumb.Template>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="GripBorder" Background="#FFD6D6D6"
+                                BorderBrush="#FF888888" BorderThickness="1" CornerRadius="2">
+                            <TextBlock Text="✥" FontSize="17" Foreground="#FF333333"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="GripBorder" Property="Background" Value="#FFF2F2F2" />
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="GripBorder" Property="Background" Value="#FF98BFF7" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Thumb.Template>
+            </Thumb>
             <Button Name="btnSwitch" Margin="2" Width="20" Grid.Column="0"  ToolTip="Switch" Background="#FF0E910E" Click="btnSwitch_Click" />
             <Button Margin="2" Width="20" Grid.Column="2" Content="D" Click="Button_Click" ToolTip="Delete All" Background="#FF2AAEC3"  />
 

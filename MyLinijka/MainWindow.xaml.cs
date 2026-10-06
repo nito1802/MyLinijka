@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -25,7 +26,6 @@ namespace MyLinijka
     {
         private bool IsMouseDown = false;
         private bool IsShiftLine = false;
-        private bool IsToolbarMoving = false;
         private AlignEnum alignE = AlignEnum.None;
         private CreateShape createShape = CreateShape.Line;
 
@@ -61,21 +61,8 @@ namespace MyLinijka
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            string cursorType = this.Cursor.ToString();
-
-            Point mousePos = e.GetPosition(this);
-
-            // Perform the hit test against a given portion of the visual object tree.
-            HitTestResult result = VisualTreeHelper.HitTest(MainCanvas, mousePos);
-
-            if (result != null)
-            {
-                var hitGrid = result.VisualHit as Grid;
-                if (hitGrid != null && hitGrid.Name == "ToolbarGrid")
-                {
-                    return;
-                }
-            }
+            if (e.ChangedButton != MouseButton.Left || ToolbarGrid.IsMouseOver || ChangeColorGrid.IsMouseOver)
+                return;
 
             if (tbFocusable != null)
                 tbFocusable.MoveFocus(new TraversalRequest(FocusNavigationDirection.Last));
@@ -207,14 +194,7 @@ namespace MyLinijka
                 }
             }
 
-            if (e.Key == Key.W)
-            {
-                IsToolbarMoving = true;
-                Cursor = Cursors.Hand;
-
-                SetToolbarPosition();
-            }
-            else if (e.Key == Key.S)
+            if (e.Key == Key.S)
             {
                 if (createShape == CreateShape.Line)
                 {
@@ -239,7 +219,7 @@ namespace MyLinijka
 
         protected override void OnPreviewKeyUp(KeyEventArgs e)
         {
-            IsShiftLine = IsToolbarMoving = false;
+            IsShiftLine = false;
             Cursor = Cursors.Cross;
 
             base.OnPreviewKeyUp(e);
@@ -348,11 +328,6 @@ namespace MyLinijka
                 }
             }
 
-            if (IsToolbarMoving)
-            {
-                SetToolbarPosition();
-            }
-
             //base.OnMouseMove(e);
         }
 
@@ -366,23 +341,20 @@ namespace MyLinijka
             base.OnMouseUp(e);
         }
 
-        private void SetToolbarPosition()
+        private void ToolbarDragHandle_DragDelta(object sender, DragDeltaEventArgs e)
         {
-            Point CurrentPt = Mouse.GetPosition(this);
+            double left = Canvas.GetLeft(ToolbarGrid);
+            double top = Canvas.GetTop(ToolbarGrid);
+            if (double.IsNaN(left)) left = 0;
+            if (double.IsNaN(top)) top = 0;
 
-            double tempX = CurrentPt.X - ToolbarGrid.ActualWidth / 6;
-            double tempY = CurrentPt.Y - ToolbarGrid.ActualHeight / 3;
-
-            if (tempX < 0) tempX = 0;
-            else if (tempX > (this.ActualWidth - ToolbarGrid.ActualWidth)) tempX = this.ActualWidth - ToolbarGrid.ActualWidth;
-
-            if (tempY < 0) tempY = 0;
-            else if (tempY > (this.ActualHeight - ToolbarGrid.ActualHeight)) tempY = this.ActualHeight - ToolbarGrid.ActualHeight;
-
-            Canvas.SetLeft(ToolbarGrid, tempX);
-            Canvas.SetTop(ToolbarGrid, tempY);
+            Canvas.SetLeft(ToolbarGrid, Math.Clamp(left + e.HorizontalChange,
+                0, Math.Max(0, MainCanvas.ActualWidth - ToolbarGrid.ActualWidth)));
+            Canvas.SetTop(ToolbarGrid, Math.Clamp(top + e.VerticalChange,
+                0, Math.Max(0, MainCanvas.ActualHeight - ToolbarGrid.ActualHeight)));
+            ChangeColorGrid.Visibility = Visibility.Collapsed;
+            e.Handled = true;
         }
-
         public double GetAngle()
         {
             return Math.Atan2(toolbarOptions.StatsDataContext.EndPoint.Y - toolbarOptions.StatsDataContext.StartPoint.Y, toolbarOptions.StatsDataContext.EndPoint.X - toolbarOptions.StatsDataContext.StartPoint.X);
@@ -537,19 +509,6 @@ namespace MyLinijka
         private void btnQuit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
-        }
-
-        private void ToolbarGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Canvas.SetLeft(ToolbarGrid, 345);
-
-            Point relativePoint = ToolbarGrid.TransformToAncestor(MainCanvas)
-                          .Transform(new Point(0, 0));
-
-            var startXPos = e.GetPosition(this).X;
-            var startYPos = e.GetPosition(this).Y;
-
-            //MovingObject = sender;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
