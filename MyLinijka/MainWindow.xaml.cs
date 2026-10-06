@@ -1,15 +1,15 @@
-﻿using System.ComponentModel;
+﻿using MyLinijka.Models;
+using System.ComponentModel;
 using System.Diagnostics;
-using MyLinijka.Models;
 using System.IO;
 using System.Text.Json;
-using System.Windows.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace MyLinijka
 {
@@ -388,7 +388,7 @@ namespace MyLinijka
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(this, "Czy na pewno usunąć wszystkie rysunki?", "Usuń wszystko",
+            if (MessageBox.Show(this, "Czy na pewno usunąć wszystkie figury?", "Usuń wszystko",
                 MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) != MessageBoxResult.Yes)
                 return;
 
