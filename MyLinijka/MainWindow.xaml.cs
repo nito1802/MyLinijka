@@ -74,7 +74,6 @@ namespace MyLinijka
                 Canvas.SetTop(ToolbarGrid, Math.Clamp(settings.PanelTop, 0,
                     Math.Max(0, MainCanvas.ActualHeight - ToolbarGrid.ActualHeight)));
                 SelectShape(settings.RectangleSelected ? CreateShape.Rectangle : CreateShape.Line);
-                if (settings.ClickThrough) btnSwitch_Click(btnSwitch, new RoutedEventArgs());
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException)
             {
@@ -510,7 +509,6 @@ namespace MyLinijka
                 Background = Brushes.Transparent;
                 btn.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFB6B6B6"));
             }
-            QueueSettingsSave();
         }
 
         private void QueueSettingsSave()
@@ -536,7 +534,6 @@ namespace MyLinijka
                 settings.PanelLeft = Canvas.GetLeft(ToolbarGrid);
                 settings.PanelTop = Canvas.GetTop(ToolbarGrid);
                 settings.RectangleSelected = createShape == CreateShape.Rectangle;
-                settings.ClickThrough = Background == Brushes.Transparent;
                 SettingsSerializer.Save(settings);
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException or ArgumentException)

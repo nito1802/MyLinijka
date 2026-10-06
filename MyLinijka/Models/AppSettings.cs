@@ -24,7 +24,6 @@ public sealed class AppSettings
     public double PanelLeft { get; set; } = 200;
     public double PanelTop { get; set; }
     public bool RectangleSelected { get; set; }
-    public bool ClickThrough { get; set; }
 
     internal void Validate()
     {
