@@ -372,6 +372,10 @@ namespace MyLinijka
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            if (MessageBox.Show(this, "Czy na pewno usunąć wszystkie rysunki?", "Usuń wszystko",
+                MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) != MessageBoxResult.Yes)
+                return;
+
             stackUndoOfShapes.Push(new StateAction(listOfShapes.ToList(), StateAction.TypeOfAction.DeleteAll));
 
             listOfShapes.ForEach(x =>
@@ -506,18 +510,6 @@ namespace MyLinijka
             }
         }
 
-        private void btnQuit_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Q)
-            {
-                this.Close();
-            }
-        }
     }
 
     public class StateAction : ICloneable
