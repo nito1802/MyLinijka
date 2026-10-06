@@ -1,8 +1,6 @@
 ﻿using MyLinijka.Models;
 using System.ComponentModel;
-using System.IO;
 using System.Windows.Media;
-using System.Xml.Serialization;
 
 namespace MyLinijka
 {
@@ -67,6 +65,7 @@ namespace MyLinijka
 
             set
             {
+                if (!double.IsFinite(value) || value < 0) return;
                 lineThickness = value;
                 OnPropertyChanged("LineThickness");
             }
@@ -109,40 +108,10 @@ namespace MyLinijka
 
             set
             {
+                if (!double.IsFinite(value) || value < 0) return;
                 rectThickness = value;
                 OnPropertyChanged("RectThickness");
             }
-        }
-
-        public static void Serialize(DrawOptionsModel arg)
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(DrawOptionsModel));
-            using (TextWriter writer = new StreamWriter("ConfigFile.xml"))
-            {
-                serializer.Serialize(writer, arg);
-            }
-        }
-
-        public void Serialize()
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(DrawOptionsModel));
-            using (TextWriter writer = new StreamWriter("ConfigFile.xml"))
-            {
-                serializer.Serialize(writer, this);
-            }
-        }
-
-        static public DrawOptionsModel Deserialize()
-        {
-            XmlSerializer deserializer = new XmlSerializer(typeof(DrawOptionsModel));
-            DrawOptionsModel obj;
-            using (TextReader reader = new StreamReader("ConfigFile.xml"))
-            {
-                obj = (DrawOptionsModel)deserializer.Deserialize(reader);
-                //AddressDetails XmlData = (AddressDetails)obj;
-            }
-
-            return obj;
         }
 
         public event PropertyChangedEventHandler PropertyChanged; //INotifyPropertyChanged

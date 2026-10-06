@@ -140,12 +140,12 @@
             <TextBlock x:Name="tbLengthStats" Margin="10 0 0 0" Grid.Row="2" Grid.Column="4" Text="Length" FontWeight="Bold" VerticalAlignment="Center"/>
             <TextBlock x:Name="tbAngleStats" Margin="10 0 0 0" Grid.Row="3" Grid.Column="4" Text="Angle" FontWeight="Bold" VerticalAlignment="Center"/>
 
-            <TextBox x:Name="tBoxStartStats" Margin="5 0 5 0" Grid.Column="5" Text="{Binding StatsDataContext.StartPoint}" VerticalAlignment="Center"/>
-            <TextBox x:Name="tBoxEndStats" Margin="5 0 5 0" Grid.Row="1" Grid.Column="5" Text="{Binding StatsDataContext.EndPoint}" VerticalAlignment="Center"/>
-            <TextBox x:Name="tBoxLengthStats" Margin="5 0 5 0" Grid.Row="2" Grid.Column="5" Text="{Binding StatsDataContext.LengthLine, StringFormat={}{0:N0}}" VerticalAlignment="Center"/>
-            <TextBox x:Name="tBoxAngleStats" Margin="5 0 5 0" Grid.Row="3" Grid.Column="5" Text="{Binding StatsDataContext.Angle,StringFormat={}{0:N1}}" VerticalAlignment="Center"/>
-            <TextBox x:Name="tBoxWidthStats" Margin="5 0 5 0" Grid.Row="2" Grid.Column="5" Visibility="Collapsed" Text="{Binding StatsDataContext.Width, StringFormat={}{0:N0}}" VerticalAlignment="Center"/>
-            <TextBox x:Name="tBoxHeightStats" Margin="5 0 5 0" Grid.Row="3" Grid.Column="5" Visibility="Collapsed" Text="{Binding StatsDataContext.Height, StringFormat={}{0:N0}}" VerticalAlignment="Center"/>
+            <TextBox x:Name="tBoxStartStats" Margin="5 0 5 0" Grid.Column="5" Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=StatsDataContext.StartPoint}" VerticalAlignment="Center"/>
+            <TextBox x:Name="tBoxEndStats" Margin="5 0 5 0" Grid.Row="1" Grid.Column="5" Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=StatsDataContext.EndPoint}" VerticalAlignment="Center"/>
+            <TextBox x:Name="tBoxLengthStats" Margin="5 0 5 0" Grid.Row="2" Grid.Column="5" Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=StatsDataContext.LengthLine, StringFormat={}{0:N0}}" VerticalAlignment="Center"/>
+            <TextBox x:Name="tBoxAngleStats" Margin="5 0 5 0" Grid.Row="3" Grid.Column="5" Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=StatsDataContext.Angle,StringFormat={}{0:N1}}" VerticalAlignment="Center"/>
+            <TextBox x:Name="tBoxWidthStats" Margin="5 0 5 0" Grid.Row="2" Grid.Column="5" Visibility="Collapsed" Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=StatsDataContext.Width, StringFormat={}{0:N0}}" VerticalAlignment="Center"/>
+            <TextBox x:Name="tBoxHeightStats" Margin="5 0 5 0" Grid.Row="3" Grid.Column="5" Visibility="Collapsed" Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=StatsDataContext.Height, StringFormat={}{0:N0}}" VerticalAlignment="Center"/>
 
             <Label Grid.Row="1" Grid.Column="1" Content="F" HorizontalAlignment="Center" ToolTip="Fill" />
             <Label Grid.Row="1" Grid.Column="2" Content="S" HorizontalAlignment="Center" ToolTip="Stroke" />

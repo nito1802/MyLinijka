@@ -21,6 +21,7 @@ namespace MyLinijka.Models
 
             set
             {
+                if (!double.IsFinite(value.X) || !double.IsFinite(value.Y)) return;
                 startPoint = value;
                 OnPropertyChanged("StartPoint");
             }
@@ -35,6 +36,7 @@ namespace MyLinijka.Models
 
             set
             {
+                if (!double.IsFinite(value.X) || !double.IsFinite(value.Y)) return;
                 endPoint = value;
                 OnPropertyChanged("EndPoint");
             }
@@ -49,6 +51,7 @@ namespace MyLinijka.Models
 
             set
             {
+                if (!double.IsFinite(value) || value < 0) return;
                 lengthLine = value;
                 OnPropertyChanged("LengthLine");
             }
@@ -63,6 +66,7 @@ namespace MyLinijka.Models
 
             set
             {
+                if (!double.IsFinite(value)) return;
                 angle = value;
                 OnPropertyChanged("Angle");
             }
@@ -77,6 +81,7 @@ namespace MyLinijka.Models
 
             set
             {
+                if (!double.IsFinite(value) || value < 0) return;
                 width = value;
                 OnPropertyChanged("Width");
             }
@@ -91,6 +96,7 @@ namespace MyLinijka.Models
 
             set
             {
+                if (!double.IsFinite(value) || value < 0) return;
                 height = value;
                 OnPropertyChanged("Height");
             }

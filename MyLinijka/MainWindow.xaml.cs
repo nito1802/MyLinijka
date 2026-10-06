@@ -1,5 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using MyLinijka.Models;
+using System.IO;
+using System.Text.Json;
+using System.Windows.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -31,6 +35,9 @@ namespace MyLinijka
 
         DrawOptionsModel toolbarOptions = new DrawOptionsModel();
         TextBox tbFocusable;
+        private readonly DispatcherTimer settingsTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
+        private bool settingsReady;
+        private bool settingsErrorShown;
 
 
         private Line activeLine;
@@ -51,12 +58,31 @@ namespace MyLinijka
             ToolbarGrid.DataContext = toolbarOptions;
 
             ChangeColorGrid.Visibility = Visibility.Collapsed;
-            //Canvas.SetLeft(PanelData, 700); 
+            settingsTimer.Tick += (_, _) => SaveSettings();
+            toolbarOptions.PropertyChanged += (_, _) => QueueSettingsSave();
+            toolbarOptions.StatsDataContext.PropertyChanged += (_, _) => QueueSettingsSave();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //MessageBox.Show("a: " + System.Windows.SystemParameters.WorkArea.Height);
+            try
+            {
+                var settings = AppSettings.Load();
+                settings.Apply(toolbarOptions);
+                Canvas.SetLeft(ToolbarGrid, Math.Clamp(settings.PanelLeft, 0,
+                    Math.Max(0, MainCanvas.ActualWidth - ToolbarGrid.ActualWidth)));
+                Canvas.SetTop(ToolbarGrid, Math.Clamp(settings.PanelTop, 0,
+                    Math.Max(0, MainCanvas.ActualHeight - ToolbarGrid.ActualHeight)));
+                SelectShape(settings.RectangleSelected ? CreateShape.Rectangle : CreateShape.Line);
+                if (settings.ClickThrough) btnSwitch_Click(btnSwitch, new RoutedEventArgs());
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException)
+            {
+                MessageBox.Show(this, $"Nie udało się odczytać ustawień:\n{AppSettings.FilePath}\n\n{error.Message}",
+                    "Ustawienia", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            settingsReady = true;
+            if (!File.Exists(AppSettings.FilePath)) QueueSettingsSave();
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -196,18 +222,7 @@ namespace MyLinijka
 
             if (e.Key == Key.S)
             {
-                if (createShape == CreateShape.Line)
-                {
-                    LineBorder.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#01FFFFFF"));
-                    RectBorder.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#4CFFFFFF"));
-                    createShape = CreateShape.Rectangle;
-                }
-                else if (createShape == CreateShape.Rectangle)
-                {
-                    LineBorder.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#4CFFFFFF"));
-                    RectBorder.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#01FFFFFF"));
-                    createShape = CreateShape.Line;
-                }
+                SelectShape(createShape == CreateShape.Line ? CreateShape.Rectangle : CreateShape.Line);
             }
             else if (e.Key == Key.A)
             {
@@ -353,6 +368,7 @@ namespace MyLinijka
             Canvas.SetTop(ToolbarGrid, Math.Clamp(top + e.VerticalChange,
                 0, Math.Max(0, MainCanvas.ActualHeight - ToolbarGrid.ActualHeight)));
             ChangeColorGrid.Visibility = Visibility.Collapsed;
+            QueueSettingsSave();
             e.Handled = true;
         }
         public double GetAngle()
@@ -440,47 +456,33 @@ namespace MyLinijka
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            //ToolbarOptions.Serialize(toolbarOptions);
+            if (settingsTimer.IsEnabled) SaveSettings();
         }
 
         private void LineBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (createShape != CreateShape.Line)
-            {
-                LineBorder.Style = (Style)TryFindResource("ShapeBorderClicked");
-                RectBorder.Style = (Style)TryFindResource("ShapeHoverBorder");
-                createShape = CreateShape.Line;
-
-                tBoxLengthStats.Visibility = Visibility.Visible;
-                tBoxAngleStats.Visibility = Visibility.Visible;
-                tBoxWidthStats.Visibility = Visibility.Collapsed;
-                tBoxHeightStats.Visibility = Visibility.Collapsed;
-
-                tbLengthStats.Text = "Length";
-                tbAngleStats.Text = "Angle";
-            }
+            SelectShape(CreateShape.Line);
             e.Handled = true;
         }
 
         private void RectBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (createShape != CreateShape.Rectangle)
-            {
-                LineBorder.Style = (Style)TryFindResource("ShapeHoverBorder");
-                RectBorder.Style = (Style)TryFindResource("ShapeBorderClicked");
-                createShape = CreateShape.Rectangle;
-
-                tBoxLengthStats.Visibility = Visibility.Collapsed;
-                tBoxAngleStats.Visibility = Visibility.Collapsed;
-                tBoxWidthStats.Visibility = Visibility.Visible;
-                tBoxHeightStats.Visibility = Visibility.Visible;
-
-                tbLengthStats.Text = "Width";
-                tbAngleStats.Text = "Height";
-            }
+            SelectShape(CreateShape.Rectangle);
             e.Handled = true;
         }
 
+        private void SelectShape(CreateShape shape)
+        {
+            createShape = shape;
+            bool rectangle = shape == CreateShape.Rectangle;
+            LineBorder.Style = (Style)FindResource(rectangle ? "ShapeHoverBorder" : "ShapeBorderClicked");
+            RectBorder.Style = (Style)FindResource(rectangle ? "ShapeBorderClicked" : "ShapeHoverBorder");
+            tBoxLengthStats.Visibility = tBoxAngleStats.Visibility = rectangle ? Visibility.Collapsed : Visibility.Visible;
+            tBoxWidthStats.Visibility = tBoxHeightStats.Visibility = rectangle ? Visibility.Visible : Visibility.Collapsed;
+            tbLengthStats.Text = rectangle ? "Width" : "Length";
+            tbAngleStats.Text = rectangle ? "Height" : "Angle";
+            QueueSettingsSave();
+        }
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             tbFocusable = sender as TextBox;
@@ -507,6 +509,35 @@ namespace MyLinijka
             {
                 Background = Brushes.Transparent;
                 btn.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFB6B6B6"));
+            }
+            QueueSettingsSave();
+        }
+
+        private void QueueSettingsSave()
+        {
+            if (!settingsReady) return;
+            settingsTimer.Stop();
+            settingsTimer.Start();
+        }
+
+        private void SaveSettings()
+        {
+            settingsTimer.Stop();
+            try
+            {
+                var settings = AppSettings.Capture(toolbarOptions);
+                settings.PanelLeft = Canvas.GetLeft(ToolbarGrid);
+                settings.PanelTop = Canvas.GetTop(ToolbarGrid);
+                settings.RectangleSelected = createShape == CreateShape.Rectangle;
+                settings.ClickThrough = Background == Brushes.Transparent;
+                settings.Save();
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
+            {
+                if (settingsErrorShown) return;
+                settingsErrorShown = true;
+                MessageBox.Show(this, $"Nie udało się zapisać ustawień obok aplikacji:\n{AppSettings.FilePath}\n\n{error.Message}",
+                    "Ustawienia", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
