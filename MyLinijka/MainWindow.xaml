@@ -166,12 +166,24 @@
                 <Rectangle Width="10" Height="10" Fill="{Binding LineFill, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="3,5,0,5"  />
             </Border>
 
-            <Border Padding="2" Style="{StaticResource HoverBorder}" Grid.Row="3" Grid.Column="1" PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown">
-                <Rectangle Width="10" Height="10" Fill="{Binding RectFill, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  />
-            </Border>
-
-            <Border Padding="2" Style="{StaticResource HoverBorder}" Width="20" Grid.Row="2" Grid.Column="2" PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown">
-                <Rectangle Width="10" Height="10" Fill="{Binding LineStroke, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  />
+            <Border x:Name="RectFillBorder" Padding="2" Style="{StaticResource HoverBorder}" Grid.Row="3" Grid.Column="1" PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown">
+                <Grid Width="10" Height="10">
+                    <Rectangle Fill="{Binding RectFill, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                    <Grid IsHitTestVisible="False">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RectFill.Color.A}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Rectangle Fill="White" Stroke="#FF666666" StrokeThickness="0.5" />
+                        <Path Data="M 0,10 L 10,0" Stroke="#FF333333" StrokeThickness="1" />
+                    </Grid>
+                </Grid>
             </Border>
 
             <Border Padding="2" Style="{StaticResource HoverBorder}" Width="20" Grid.Row="3" Grid.Column="2" PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown">
@@ -199,7 +211,18 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
+
+            <Border x:Name="TransparentColorPickup" Grid.Column="4" Width="20" Height="20"
+                    Visibility="Collapsed" Tag="Transparent" ToolTip="Przezroczyste wypełnienie"
+                    Style="{StaticResource HoverBorderColorPickup}"
+                    PreviewMouseLeftButtonDown="ColorPickup_PreviewMouseLeftButtonDown">
+                <Grid Width="10" Height="10">
+                    <Rectangle Fill="White" Stroke="#FF666666" StrokeThickness="0.5" />
+                    <Path Data="M 0,10 L 10,0" Stroke="#FF333333" StrokeThickness="1" />
+                </Grid>
+            </Border>
 
             <Border Name="ColorPickup" Width="20" Height="20" Style="{StaticResource HoverBorderColorPickup}" PreviewMouseLeftButtonDown="ColorPickup_PreviewMouseLeftButtonDown" >
                 <!--Background="#B2D4D3D3"-->

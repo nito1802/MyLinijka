@@ -112,7 +112,7 @@ namespace MyLinijka
                     activeLine.Fill = toolbarOptions.LineFill;
 
                     activeLine.StrokeThickness = toolbarOptions.LineThickness;
-                    activeLine.Stroke = toolbarOptions.LineStroke;
+                    activeLine.Stroke = toolbarOptions.LineFill;
 
                     var fillColor = ((SolidColorBrush)(activeLine.Fill)).Color;
                     fillColor.A = 200;
@@ -148,7 +148,7 @@ namespace MyLinijka
                     activeRectangle.StrokeThickness = toolbarOptions.RectThickness;
 
                     var fillColor = ((SolidColorBrush)(activeRectangle.Fill)).Color;
-                    fillColor.A = 160;
+                    if (fillColor.A != 0) fillColor.A = 160;
                     activeRectangle.Fill = new SolidColorBrush(fillColor);
 
                     var fillStroke = ((SolidColorBrush)(activeRectangle.Stroke)).Color;
@@ -409,6 +409,8 @@ namespace MyLinijka
             ChangeColorGrid.Visibility = Visibility.Visible;
 
             Border br = sender as Border;
+            TransparentColorPickup.Visibility = br == RectFillBorder
+                ? Visibility.Visible : Visibility.Collapsed;
             br.Style = (Style)FindResource("BorderClicked");
             //br.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#B2FFFFFF"));
             activeColorBorder = br;
@@ -424,7 +426,9 @@ namespace MyLinijka
         {
             Border br = sender as Border;
 
-            GetVisualChild<Rectangle>(activeColorBorder).Fill = GetVisualChild<Rectangle>(br).Fill;
+            Brush color = Equals(br.Tag, "Transparent")
+                ? Brushes.Transparent : GetVisualChild<Rectangle>(br).Fill;
+            GetVisualChild<Rectangle>(activeColorBorder).SetCurrentValue(Shape.FillProperty, color);
             activeColorBorder.Style = (Style)FindResource("HoverBorder");
             activeColorBorder = null;
             ChangeColorGrid.Visibility = Visibility.Collapsed;
