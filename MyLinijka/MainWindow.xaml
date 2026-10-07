@@ -151,6 +151,15 @@
             <TextBox x:Name="tBoxWidthStats" Margin="5 0 5 0" Grid.Row="2" Grid.Column="5" Visibility="Collapsed" Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=StatsDataContext.Width, StringFormat={}{0:N0}}" VerticalAlignment="Center"/>
             <TextBox x:Name="tBoxHeightStats" Margin="5 0 5 0" Grid.Row="3" Grid.Column="5" Visibility="Collapsed" Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=StatsDataContext.Height, StringFormat={}{0:N0}}" VerticalAlignment="Center"/>
 
+            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="UndoButton" Width="14" Height="20" Padding="0" Content="↶"
+                        FontSize="14" Focusable="False" IsEnabled="False" Click="UndoButton_Click"
+                        ToolTip="Cofnij (Ctrl+Z)" AutomationProperties.Name="Cofnij" />
+                <Button x:Name="RedoButton" Width="14" Height="20" Padding="0" Content="↷"
+                        FontSize="14" Focusable="False" IsEnabled="False" Click="RedoButton_Click"
+                        ToolTip="Ponów (Ctrl+Y)" AutomationProperties.Name="Ponów" />
+            </StackPanel>
+
             <Label Grid.Row="1" Grid.Column="1" Content="F" HorizontalAlignment="Center" ToolTip="Fill" />
             <Label Grid.Row="1" Grid.Column="2" Content="S" HorizontalAlignment="Center" ToolTip="Stroke" />
             <Label Grid.Row="1" Grid.Column="3" Content="T" HorizontalAlignment="Center" ToolTip="Thickness" />

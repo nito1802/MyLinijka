@@ -125,6 +125,8 @@ namespace MyLinijka
                     MainCanvas.Children.Add(activeLine);
                     listOfShapes.Add(activeLine);
                     stackUndoOfShapes.Push(new StateAction(activeLine, StateAction.TypeOfAction.Normal));
+                    stackRedoOfShapes.Clear();
+                    UpdateHistoryButtons();
                 }
 
                 activeLine.X1 = toolbarOptions.StatsDataContext.StartPoint.X;
@@ -158,6 +160,8 @@ namespace MyLinijka
                     MainCanvas.Children.Add(activeRectangle);
                     listOfShapes.Add(activeRectangle);
                     stackUndoOfShapes.Push(new StateAction(activeRectangle, StateAction.TypeOfAction.Normal));
+                    stackRedoOfShapes.Clear();
+                    UpdateHistoryButtons();
                 }
                 //activeRectangle.X1 = lineStatsPanelData.StartPoint.X;
                 //activeLine.Y1 = lineStatsPanelData.StartPoint.Y;
@@ -175,6 +179,14 @@ namespace MyLinijka
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
+            if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.Z || e.Key == Key.Y)
+                && Keyboard.FocusedElement is not TextBox)
+            {
+                if (e.Key == Key.Z) UndoButton_Click(this, new RoutedEventArgs());
+                else RedoButton_Click(this, new RoutedEventArgs());
+                e.Handled = true;
+                return;
+            }
             //Debug.WriteLine("DOWNNNNNNNNNN");
             if (createShape == CreateShape.Line && !IsShiftLine && (e.Key == Key.LeftShift || e.Key == Key.RightShift))
             {
@@ -351,6 +363,7 @@ namespace MyLinijka
             this.ReleaseMouseCapture();
             activeLine = null;
             activeRectangle = null;
+            UpdateHistoryButtons();
 
             base.OnMouseUp(e);
         }
@@ -387,18 +400,67 @@ namespace MyLinijka
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            if (IsMouseDown || listOfShapes.Count == 0) return;
             if (MessageBox.Show(this, "Czy na pewno usunąć wszystkie figury?", "Usuń wszystko",
                 MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) != MessageBoxResult.Yes)
                 return;
 
             stackUndoOfShapes.Push(new StateAction(listOfShapes.ToList(), StateAction.TypeOfAction.DeleteAll));
+            stackRedoOfShapes.Clear();
 
             listOfShapes.ForEach(x =>
             {
                 MainCanvas.Children.Remove(x);
             });
             listOfShapes.Clear();
+            UpdateHistoryButtons();
 
+        }
+
+        private void UpdateHistoryButtons()
+        {
+            UndoButton.IsEnabled = !IsMouseDown && stackUndoOfShapes.Count > 0;
+            RedoButton.IsEnabled = !IsMouseDown && stackRedoOfShapes.Count > 0;
+        }
+
+        private void UndoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsMouseDown || !stackUndoOfShapes.TryPop(out var action)) return;
+            if (action.eTypeAction == StateAction.TypeOfAction.DeleteAll)
+            {
+                foreach (var shape in action.listOfShape)
+                {
+                    MainCanvas.Children.Add(shape);
+                    listOfShapes.Add(shape);
+                }
+            }
+            else
+            {
+                MainCanvas.Children.Remove(action.shape);
+                listOfShapes.Remove(action.shape);
+            }
+            stackRedoOfShapes.Push(action);
+            UpdateHistoryButtons();
+        }
+
+        private void RedoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsMouseDown || !stackRedoOfShapes.TryPop(out var action)) return;
+            if (action.eTypeAction == StateAction.TypeOfAction.DeleteAll)
+            {
+                foreach (var shape in action.listOfShape)
+                {
+                    MainCanvas.Children.Remove(shape);
+                    listOfShapes.Remove(shape);
+                }
+            }
+            else
+            {
+                MainCanvas.Children.Add(action.shape);
+                listOfShapes.Add(action.shape);
+            }
+            stackUndoOfShapes.Push(action);
+            UpdateHistoryButtons();
         }
 
         private void Border_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
