@@ -586,9 +586,7 @@ namespace MyLinijka
 
         private void btnQuit_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(this, "Czy na pewno chcesz zamknąć aplikację?", "Zamknij aplikację",
-                MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
-                Close();
+            Close();
         }
 
         private void SaveSettings()
